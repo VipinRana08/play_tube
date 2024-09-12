@@ -4,7 +4,7 @@ import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
-import { Mongoose } from "mongoose";
+import mongoose from "mongoose";
 
 
 const generateAccessAndRefreshTokens = async (userId) => {
@@ -282,23 +282,24 @@ const updateUserCoverImage = asyncHandler ( async (req, res) => {
     return res.status(200).json(new ApiResponse(200,user,"Cover image updated successfully !!!"));
 });
 
-const getUserChannelProfile = asyncHandler ( async () => {
+const getUserChannelProfile = asyncHandler ( async (req, res) => {
 
     const {username} = req.params;
+    console.log("username : " ,username);
 
     if(!username){
         throw new ApiErrors(400, "Username is missing !!!");
     }
 
-    const channel = User.aggregate([
+    const channel = await User.aggregate([
         {
             $match: {
-                username: username.trim().toLowerCase()
+                username: username?.trim().toLowerCase()
             }
         },
         {
             $lookup: {
-                from: "subcriptions",
+                from: "subscriptions",
                 localField: "_id",
                 foreignField: "channel",
                 as: "subscribers"
@@ -306,7 +307,7 @@ const getUserChannelProfile = asyncHandler ( async () => {
         },
         {
             $lookup: {
-                from: "subcriptions",
+                from: "subscriptions",
                 localField: "_id",
                 foreignField: "subscriber",
                 as: "subscribedTo"
@@ -318,7 +319,7 @@ const getUserChannelProfile = asyncHandler ( async () => {
                     $size: "$subscribers"
                 },
                 channelSubscribedToCount: {
-                    $size: "subscribedTo"
+                    $size: "$subscribedTo"
                 },
                 isSubscribed: {
                     $cond: {
@@ -342,7 +343,7 @@ const getUserChannelProfile = asyncHandler ( async () => {
             }
         }
     ]);
-
+    console.log("channel : ", channel);
     if(!channel?.length){
         throw new ApiErrors(400, "Channel does not exists !!!");
     }
@@ -357,7 +358,7 @@ const getUserChannelProfile = asyncHandler ( async () => {
 
 });
 
-const getWatchHistory = asyncHandler ( async () => {
+const getWatchHistory = asyncHandler ( async (req, res) => {
     const user = await User.aggregate([
         {
             $match: {
