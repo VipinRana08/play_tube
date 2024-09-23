@@ -5,6 +5,7 @@ import {asyncHandler} from "../utils/asyncHandler.js";
 import { ApiErrors } from "../utils/ApiErrors.js";
 import {Video} from "../models/video.model.js";
 import {Comment} from "../models/comment.model.js";
+import { Tweet } from "../models/tweet.model.js";
 
 const toggleVideoLike = asyncHandler(async (req, res) => {
     const {videoId} = req.params;
@@ -84,8 +85,7 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
     if(!isValidObjectId(tweetId)){
         throw new ApiResponse(400, "Invalid tweet ID!");
     }
-
-    const tweet = await Comment.findById(tweetId);
+    const tweet = await Tweet.findById(tweetId);
     if(!tweet){
         throw new ApiErrors(404, "Tweet not found!");
     }
