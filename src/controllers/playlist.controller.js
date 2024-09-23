@@ -10,7 +10,7 @@ const createPlaylist = asyncHandler(async (req, res) => {
     const {name, description} = req.body;
 
     if ([name, description].some((field) => field.trim() === "")) {
-        throw new ApiError(400, "All fields are required!");
+        throw new ApiErrors(400, "All fields are required!");
     }
 
     const playlist = await Playlist.create({
@@ -90,7 +90,7 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
     const updatedPlaylist = await Playlist.findByIdAndUpdate(
         playlistId,
         {
-            $push: { video: videoId }
+            $push: { videos: videoId }
         }, {new: true}
     );
 
@@ -112,7 +112,7 @@ const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
     const updatedPlaylist  = await Playlist.findByIdAndUpdate(
         playlistId,
         {
-            $pull: { video: videoId }
+            $pull: { videos: videoId }
         }, {new: true}
     );
 
